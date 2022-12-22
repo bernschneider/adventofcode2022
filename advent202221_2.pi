@@ -25,10 +25,9 @@ main =>
         end
     end,
     ([KeyX, _, KeyY], _) = M.get("root"),
-    (_,X) = M.get(KeyX), 
-    (_,Y) = M.get(KeyY), 
+    (_,X) = M.get(KeyX), eval(M, KeyX),
+    (_,Y) = M.get(KeyY), eval(M, KeyY), 
     X #= Y,
-    eval(M, KeyX), eval(M, KeyY),
     solve([Humn, X, Y]),
     printf("I yell %w", Humn). /*
 Part 2 example: I yell 301, CPU time 0.001 seconds, correct
