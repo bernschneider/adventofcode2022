@@ -1,0 +1,17 @@
+% Advent of Code 15.12.2022 https://adventofcode.com/2022/day/15 Part 2, inspired by Mark Engelberg
+import util, smt.
+tuningFrequency(X,Y) = X * 4000000 + Y.
+
+main(EP) => % EP = e example, EP = p problem
+    Lines = read_file_lines("202215"++cond(EP=e,"short","")++".txt"), % Example: "202215short.txt"
+    [Dx,Dy] :: 0..cond(EP=e, 20, 4000000), % search space
+    foreach(Line in Lines)
+        Split = Line.split("=,:"), 
+        [Sx,Sy, Bx,By] = map(to_int, [Split[J] : J in 2..2..8]), % S=Sensor, B=Beacon
+        Dist =  abs(Sx - Bx) + abs(Sy - By), %   manhattan distance Sensor - working Beacon
+        Dist #< abs(Sx - Dx) + abs(Sy - Dy)  % < manhattan distance Sensor - distress Beacon
+    end,
+    solve([Dx,Dy]),
+    printf("D = (%d,%d), TuningFrequency = %w", Dx, Dy, tuningFrequency(Dx, Dy) ). /*
+Part 2 Example: D = (14,11), TuningFrequency = 56000011, CPU time 0.009 seconds, correct
+Part 2 Problem: D = (3120101,2634249), TuningFrequency = 12480406634249, CPU time 0.025 seconds, correct */

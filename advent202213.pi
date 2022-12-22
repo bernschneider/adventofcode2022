@@ -1,0 +1,38 @@
+% Advent of Code 13.12.2022 https://adventofcode.com/2022/day/13
+import util.
+main =>
+    Lines = read_file_lines("202213.txt"), % Example: "202213short.txt"
+    N = (len(Lines)+1) // 3, 
+    Sum = 0,
+    foreach(P in 1..N) 
+        L = parse_term(Lines[3 * P - 2]), % Left
+        R = parse_term(Lines[3 * P - 1]), % Right
+        if inorder(L, R) then Sum := Sum + P end % , printf("%d ", P)
+    end, % nl,
+    printf("Sum of inorder indexes: %d%n", Sum), /*
+Part 1 Example: 1 2 4 6 
+Summe der inorder-Indizes: 13, correct  
+Part 1 Problem: 4 8 9 10 12 14 15 16 18 19 20 23 24 26 27 29 33 34 35 38 39 46 47 48 51 52 53 55 58 59 61 62 63 64 65 66 67 68 70 74 76 77 79 80 84 86 88 89 92 95 98 101 102 104 110 111 112 114 115 117 122 124 127 128 134 138 139 140 142 143 146 147 150 
+Summe der inorder-Indizes: 5292, correct */
+    Packets = [[[2]], [[6]]] ++ [parse_term(Lines[I]) : I in 1..3*N, I mod 3 != 0], % ohne die Leerzeilen!
+    Psorted = qsort(Packets), % foreach(P in Psorted) println(P) end,
+    I1 = find_first_of(Psorted, [[2]]), % first divisor key
+    I2 = find_first_of(Psorted, [[6]]), % second divisor key
+    printf("The decoder key is %d * %d = %d", I1, I2, I1 * I2). /*
+Part 2 Example: The decoder key is 10 * 14 = 140, correct
+Part 2 Problem: The decoder key is 117 * 204 = 23868, correct */
+
+inorder(L, R), number(L), number(R), L < R => true.
+inorder([HL|TL], [HR|TR]) => inorder(HL, HR); (same(HL, HR), inorder(TL, TR)).    
+inorder([],    [_|_]) => true.
+inorder(L, R), number(L), list(R) => inorder([L], R).
+inorder(L, R), list(L), number(R) => inorder(L, [R]).
+
+same(L, R), number(L), number(R) => L = R.
+same(L, R), number(L), list(R) => same([L], R).
+same(L, R), list(L), number(R) => same(L, [R]).
+same([], []) => true.
+same([HL|TL], [HR|TR]) => same(HL, HR), same(TL, TR).
+
+qsort([]) = L    => L = [].
+qsort([H|T]) = L => L = qsort([E : E in T, inorder(E, H)]) ++ [H] ++ qsort([E : E in T, inorder(H, E)]).

@@ -1,0 +1,29 @@
+% Advent of Code 08.12.2022 https://adventofcode.com/2022/day/8
+import util.
+mark(LM, LC, From, Step, To) =>
+    Max = LC[From], LM[From] := 1,
+    foreach(I in From+Step..Step..To)
+        if LC[I] > Max then Max := LC[I], LM[I] := 1 end
+    end.
+visible(L) = K => % wieviele Felder sind von L[1] aus sichtbar, d.h. =< L[1]?
+    Len = len(L), I = 2,
+    while(I =< Len, L[I] < L[1]) I := I + 1 end, 
+    K = I - cond(I > Len, 2, 1). % wenn I über das Ende von L hinausgeschossen ist, -2, sonst -1
+
+main =>
+    Lines = read_file_lines("202208.txt"), 
+    NZ = len(Lines), NS = len(Lines[1]),
+    M = {{0: _ in 1..NS} : _ in 1..NZ}, Mt = transpose(M),
+    C = {to_array(map(to_int, Line)) : Line in Lines}, Ct = transpose(C),
+    foreach(Z in 1..NZ) mark(M[Z], C[Z],  1, 1, NS), mark(M[Z],  C[Z],  NS, -1, 1) end, 
+    foreach(S in 1..NS) mark(Mt[S],Ct[S], 1, 1, NZ), mark(Mt[S], Ct[S], NZ, -1, 1) end, 
+    println(sum([M[Z,S] \/ Mt[S,Z] : Z in 1..NZ, S in 1..NS])),
+    % 1812, correct
+    Max = 0, ZM = 2, SM = 2,
+    foreach(Z in 2..NZ-1, S in 2..NS-1)
+        V = visible([C[I,S] : I in Z..-1..1]) * visible([C[I,S] : I in Z..NZ]) 
+          * visible([C[Z,J] : J in S..-1..1]) * visible([C[Z,J] : J in S..NS]),
+        if V > Max then Max := V, ZM := Z, SM := S end
+    end,
+    printf("Max = %d at %d|%d%n", Max, ZM, SM). 
+    % Max = 315495 at 58|16, correct

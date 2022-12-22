@@ -1,0 +1,43 @@
+% Advent of Code 11.12.2022 https://adventofcode.com/2022/day/11
+import util.
+
+main =>
+    Lines = read_file_lines("202211.txt"), 
+    N = (len(Lines) + 1) // 7,
+    Items = new_list(N), Op = new_list(N), V = new_list(N), % new = old <op> V[I]
+    Divisible = new_list(N), % for divisibility testing
+    It = new_list(N), If = new_list(N), % It = NewMonkey if True, If = NewMonkey if False
+    foreach(I in 1..N)
+        LI = 2 + 7 * (I-1), % line number for Starting items
+        Items[I] = map(to_int, Lines[LI,19..len(Lines[LI])].split(",")),
+        Op[I] = Lines[LI+1,24],
+        V[I]  = parse_term(Lines[LI+1,26..len(Lines[LI+1])]), % old -> atom old, number -> int     
+        Divisible[I] = to_int(Lines[LI+2,22..len(Lines[LI+2])]),
+        It[I] = to_int(Lines[LI+3,30]),
+        If[I] = to_int(Lines[LI+4,31]),
+        printf("Monkey %d:, Items %w, Op %c, V %w, Divisible %d, It %d, If %d%n",
+                I-1,        Items[I], Op[I], V[I], Divisible[I], It[I], If[I])
+    end,
+    P = prod(Divisible), % needed for part 2 because of run time issues 
+    Inspect = {0: _ in 1..N}, % number of item inspections of monkey I
+    foreach(_ in 1..10000) % part 1: 20, part 2: 10000
+        foreach(I in 1..N, Item in Items[I])
+            Inspect[I] := Inspect[I] + 1,
+            Items[I] := tail(Items[I]),
+            NewItem = cond(Op[I] = '+', Item + V[I],
+                      cond(V[I] = old, Item * Item, Item * V[I])), % atom old
+            % NewItem := NewItem // 3, % for part 1 only
+            NewItem := NewItem mod P,  % for part 2 necessary due to long run time otherwise 
+            NewMonkey = cond(NewItem mod Divisible[I] = 0, It[I], If[I]), 
+            Items[1+NewMonkey] := Items[1+NewMonkey] ++ [NewItem]
+        end %,
+        % foreach(I in 1..N) printf("Round %d, Monkey %d, Items %w%n", Round, I-1, Items[I]) end, nl
+    end,
+    Ranking = Inspect.sort_down(),
+    printf("Ranking %w, monkey business %w", Ranking, Ranking[1] * Ranking[2]). /*
+Part 1:
+Example: Ranking {105,101,95,7}, monkey business 10605, correct 
+Problem: {228,222,218,211,188,55,48,20}, monkey business 50616, correct 
+Part 2:
+Example: Ranking {52166,52013,47830,1938}, monkey business 2713310158, correct
+Problem: Ranking {106346,106342,98135,98133,81799,65512,49031,16402}, monkey business 11309046332, correct */

@@ -1,0 +1,23 @@
+% Advent of Code 20.12.2022 https://adventofcode.com/2022/day/20
+import util.
+
+main => 
+    Xs = [to_int(Str) : Str in read_file_lines("202220short.txt")], 
+    Ys = Xs, N = len(Xs), println(n=N),
+    foreach(X in Xs) % [1..K]
+        Del = find_first_of(Ys, X), % indizes 1..N
+        Ins = Del + X + cond(X > 0, 1, 0), % + sign(X), % + cond(X > 0, 1, 0),
+        while(Ins =< 0) Ins := Ins + N end, % printf("ins=%d, N=%d%n", Ins, N) 
+        while(Ins >  N) Ins := Ins - N end,
+        if Ins = 1 then Ys := Ys[1..Del-1] ++ Ys[Del+1..N] ++ [X]
+        else
+            Ys := cond(Del < Ins, Ys[1..Del-1] ++ Ys[Del+1..Ins-1] ++ [X|Ys[Ins..N]],
+                  cond(Ins < Del, Ys[1..Ins-1] ++ [X|Ys[Ins..Del-1] ++ Ys[Del+1..N]], Ys))
+        end
+    end,
+    println(Ys),
+    Zero = find_first_of(Ys, 0),
+    Cont = [Ys[1 + (Zero-1 + Offset) mod N] : Offset in [1000, 2000, 3000]],
+    println(sum(Cont)). /*
+Part 1 exmaple: 3, correct
+Part 1 problem: -4087 wrong :-( */

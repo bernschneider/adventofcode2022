@@ -1,0 +1,35 @@
+% Advent of Code 11.12.2022 https://adventofcode.com/2022/day/11
+import util.
+
+main =>
+    Lines = read_file_lines("202212short.txt"), % Problem: "202212.txt"
+    NZ = len(Lines), NS = len(Lines[1]), [SZ,SS, EZ,ES] = [0,0, 0,0],
+    C = {{ord(C) : C in Lines[Z]} : Z in 1..NZ},
+    foreach(Z in 1..NZ) 
+        S =  find_first_of(Lines[Z], 'S'), if S > 0 then C[Z,S] := ord('a'), SZ := Z, SS := S end,
+        S := find_first_of(Lines[Z], 'E'), if S > 0 then C[Z,S] := ord('z'), EZ := Z, ES := S end
+    end,
+    initialize_table,
+    Facts = [$edge((Z,S), (Z1,S1)) : Z in 1..NZ, S in 1..NS, Z1 in 1..NZ, S1 in 1..NS, 
+                                     abs(Z1 - Z) + abs(S1 - S) = 1, C[Z1,S1] =< C[Z,S] + 1], 
+    cl_facts(Facts), 
+    /* shortestpath((SZ,SS), (EZ,ES), W), 
+    printf("Start: %w, End: %w, Länge des Wegs: %d", (SZ,SS), (EZ,ES), W). 
+Part 1 Example: Start: 1,1,    End: 3,6,       Länge des Wegs: 31,  CPU time   0.012 seconds, correct
+Part 1 Problem: Start: (21,1), End: (21,150)], Länge des Wegs: 497, CPU time 964.884 seconds, correct */
+    highestpath(C, (EZ,ES), W),
+    printf("End: %w, Länge des Wegs: %d", (EZ,ES), W). /*
+Part 2 Example: End: 3,6, Länge des Wegs: 29, CPU time 0.011 seconds
+Part 2 Problem: End: 21,150, Länge des Wegs: 492, CPU time 956.005 seconds. */
+
+table(+,+,min) 
+shortestpath(X, Y, W) ?=> edge(X, Y), W = 1.
+shortestpath(X, Y, W1) => edge(X, Z), shortestpath(Z, Y, W), W1 = W + 1.
+
+table(+,+,min)
+highestpath(C, Y, W) ?=> 
+    NZ = len(C), NS = len(C[1]),
+    between(1, NZ, Z), 
+    between(1, NS, S), 
+    C[Z,S] = ord('a'), 
+    shortestpath((Z,S), Y, W). 

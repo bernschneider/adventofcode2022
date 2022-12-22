@@ -1,0 +1,25 @@
+% Advent of Code 03.12.2022
+% https://adventofcode.com/2022/day/3
+priority(C) = cond(ord(C) < 97, 26 + ord(C) - 64, ord(C) - 96).
+
+main1 =>
+    Total = 0,
+    foreach(Line in read_file_lines("202203.txt"))
+        Len = len(Line) // 2,
+        L1 = Line[1..Len], L2 = Line[Len+1..2*Len],
+        Res = ' ', foreach(C in L1, membchk(C, L2)) Res := C end,
+        Total := Total + priority(Res)
+    end,        
+    printf("The sum of the priorities is %d%n", Total). /*
+The sum of the priorities is 7701, correct */
+
+main2 =>
+    Total = 0,
+    Lines = read_file_lines("202203.txt"),
+    foreach(I in 1..3..len(Lines)-2)
+        L1 = Lines[I], L2 = Lines[I+1], L3 = Lines[I+2],
+        Res = ' ', foreach(C in L1, membchk(C, L2), membchk(C, L3)) Res := C end,
+        Total := Total + priority(Res)
+    end,        
+    printf("The sum of the priorities is %d%n", Total). /*
+The sum of the priorities is 2644, correct */

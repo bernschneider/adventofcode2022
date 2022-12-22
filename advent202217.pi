@@ -1,0 +1,34 @@
+% Advent of Code 17.12.2022 https://adventofcode.com/2022/day/17
+% Attention: You must remove the ending new line character from the input file before running the program!
+import util.
+
+main(Rocks) => % Rocks = 2022, % so many rocks will fall
+    M = {{cond((Z = 1; S = 1; S = 9), 1, 0) : S in 1..9} : Z in 1..4 * Rocks + 1},
+    Jet = read_file_chars("202217short.txt"),  % Problem: "202217.txt"
+    N = len(Jet), Top = 1, J = 0, 
+    Forms = {[(0,0),(0,1),(0,2),(0,3)], [(0,0),(-1,1),(0,1),(1,1),(0,2)], [(0,0),(0,1),(0,2),(1,2),(2,2)], 
+             [(0,0),(1,0),(2,0),(3,0)], [(0,0),(1,0),(0,1),(1,1)]}, % -, +, L, I, O
+    foreach(I in 1..Rocks)
+        Z0 = Top + 4 + cond((I - 1) mod 5 + 1 = 2, 1, 0), % form '+' must start one line higher
+        S0 = 4, Form = Forms[(I - 1) mod 5 + 1], Landed = 0, % println(form=Form),
+        Rock = [(Z0 + Z, S0 + S) : (Z,S) in Form], % println(Rock), % start position
+        while(Landed = 0)
+            % move horizontaly:
+            % print(Jet[J mod N + 1]),
+            if  Jet[J mod N + 1] = '>' then
+                if sum([M[Z,S+1] : (Z,S) in Rock]) = 0 then S0 := S0 + 1, Rock := [(Z,S+1) : (Z,S) in Rock] end
+            else 
+                if sum([M[Z,S-1] : (Z,S) in Rock]) = 0 then S0 := S0 - 1, Rock := [(Z,S-1) : (Z,S) in Rock] end
+            end,
+            J := J + 1, if J = N then J := 0 end,
+            % fall down:
+            if sum([M[Z-1,S] : (Z,S) in Rock]) = 0 then Z0 := Z0 - 1, Rock := [(Z-1,S) : (Z,S) in Rock] 
+            else % print(" landed! "),
+                 Landed := 1 % the rock landed                   
+            end % , printf("rock=%w%n", Rock)
+        end,
+        foreach((Z,S) in Rock) M[Z,S] := 1, Top := max(Top, Z) end % mark new rock as # and update Top
+    end, % println(M),
+    println(Top-1). /*
+Part 1 Example: 3068, correct
+Part 1 Problem: 3191, correct */

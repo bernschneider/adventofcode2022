@@ -1,0 +1,33 @@
+% Advent of Code 15.12.2022 https://adventofcode.com/2022/day/15
+import util.
+manhattan(X1,Y1,X2,Y2) = abs(X2 - X1) + abs(Y2 - Y1).
+
+main(EP) => % EP = e example, EP = p problem
+    Lines = read_file_lines("202215"++cond(EP=e,"short","")++".txt"), % Example: "202215short.txt"
+    N = len(Lines), I = 0, Y0 = cond(EP=e, 10, 2000000), BeaconsAtY0 = new_set(),
+    Sx = new_list(N), Sy = new_list(N), Bx = new_list(N), By = new_list(N), D = new_list(N), 
+    foreach(Line in Lines)
+        I := I + 1, 
+        Split = Line.split("=,:"), 
+        [Sx[I],Sy[I],Bx[I],By[I]] = map(to_int, [Split[J] : J in 2..2..8]), % S=Sensor, B=Beacon
+        D[I] = manhattan(Sx[I],Sy[I], Bx[I],By[I]), % D=Distance from Sensor to Beacon
+        if By[I] = Y0 then put(BeaconsAtY0,(Bx[I],By[I]))  end % count Beacons at line Y0
+    end, printf("There are %d Beacons at line %d%n", size(BeaconsAtY0), Y0),
+    % At the following intervalls there cannot be a beacon:
+    Iv = [(Sx[J] - DSX, Sx[J] + DSX) : J in 1..N, DSY = abs(Sy[J] - Y0), DSX = D[J] - DSY, DSX > 0].sort(),
+    % Aggregate overlapping interalls in the sorted interval list Iv:
+    K = 1,
+    while(K < len(Iv))
+        if Iv[K,2] >= Iv[K+1,1] then % overlapping
+            Iv := Iv[1..K-1] ++ [(Iv[K,1],max(Iv[K,2],Iv[K+1,2])) | Iv[K+2..len(Iv)]]
+        else K := K + 1
+        end
+    end,
+    % The following is working if there is one intervall only:
+    printf("Interval %w. %d positions cannot contain a beacon%n", Iv, Iv[1,2] - Iv[1,1] + 1 - size(BeaconsAtY0)). /*
+Part 1 Example:
+Es gibt 1 Beacons auf Zeile 10
+Interval [(-2,24)]. 26 positions cannot contain a beacon
+Part 1 Problem: 
+Es gibt 1 Beacons auf Zeile 2000000.
+Interval [(-196098,4363927)]. 4560025 positions cannot contain a beacon, correct */

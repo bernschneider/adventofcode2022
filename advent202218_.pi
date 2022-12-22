@@ -1,0 +1,38 @@
+% Advent of Code 18.12.2022 https://adventofcode.com/2022/day/18
+% todo: suche nach Blasen > 1x1x1!
+import util, ordset.
+
+main() => 
+    Lines = read_file_lines("202218.txt"), % Problem: "202218.txt"
+    N = len(Lines),
+    Cs = [ map(to_int, Line.split(",")) : Line in Lines],
+    Connected = 0,
+    foreach(J in permutations(1..3))
+        Ss = sort([ [Cs[I,J[K]] : K in 1..3] : I in 1..N ]),
+        foreach(I in 1..N-1)
+            [X0,Y0,Z0] = Ss[I], 
+            [X1,Y1,Z1] = Ss[I+1], 
+            if X0 = X1, Y0 = Y1, Z0 + 1 = Z1 then Connected := Connected + 1 end
+        end
+    end,
+    Surface =  N * 6 - Connected,
+    printf("connected: %d,surface area: %d%n", Connected, Surface), /*
+    Part 1 example: connected: 14,surface area: 64, correct 
+    Part 1 problem: connected: 11584,surface area: 4580, CPU time 0.509 seconds, correct */
+    Candidates = [[] : _ in 1..3],
+    Ps = [[1,2,3], [2,3,1], [1,3,2]], Psr = [[1,2,3], [3,1,2], [1,3,2]], % Psr = Inverse
+    foreach(P in 1..3)
+        Ss = sort([ [Cs[I,Ps[P,K]] : K in 1..3] : I in 1..N ]),
+        foreach(I in 1..N-1)
+            [X0,Y0,Z0] = Ss[I], 
+            [X1,Y1,Z1] = Ss[I+1], 
+            if X0 = X1, Y0 = Y1, Z0 + 2 = Z1 then 
+                C = [X0,Y0,Z0+1],
+                Candidates[P] := insert(Candidates[P], [C[Psr[P,K]] : K in 1..3])
+            end
+        end
+    end, println(Candidates),
+    Trapped = intersection(Candidates[1], intersection(Candidates[2], Candidates[3])),
+    printf("Trapped: %d,exterior surface area: %d%n", len(Trapped), Surface - len(Trapped) * 6). /*
+    Part 2 example: Trapped: 1,  exterior surface area: 58, correct
+    Part 1 problem: Trapped: 50, exterior surface area: 4280, too high; 4268 too high */

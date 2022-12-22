@@ -1,0 +1,23 @@
+% Advent of Code 04.12.2022
+% https://adventofcode.com/2022/day/4
+import util.
+contains(L1,R1,L2,R2) => ((L1 =< L2, R2 =< R1); (L2 =< L1, R1 =< R2)).
+overlaps(L1,R1,L2,R2) => ((L1 =< L2, R1 >= L2); (L2 =< L1, R2 >= L1)).
+
+main1 =>
+    Total = 0,
+    foreach(Line in read_file_lines("202204.txt"))
+        [L1,R1,L2,R2] = map(to_int, Line.split("-,")),
+        if contains(L1,R1,L2,R2) then Total := Total + 1 end
+    end,        
+    printf("The number of fully containung pairs is %d%n", Total). /*
+The number of fully containung pairs is 562, correct */
+
+main2 =>
+    Total = 0,
+    foreach(Line in read_file_lines("202204.txt"))
+        [L1,R1,L2,R2] = map(to_int, Line.split("-,")),
+        if overlaps(L1,R1,L2,R2) then Total := Total + 1 end
+    end,        
+    printf("The number of overlapping pairs is %d%n", Total). /*
+The number of overlapping pairs is 924, correct */

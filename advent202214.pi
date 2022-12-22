@@ -1,0 +1,49 @@
+% Advent of Code 14.12.2022 https://adventofcode.com/2022/day/14
+% Part 1: lines 33/43, main(1); Part 2: lines 34/44, main(2)
+import util.
+to_point(Str) = map(to_int, Str.split(",")).
+concat([]) = [].
+concat([H|T]) = H ++ concat(T).
+
+main(Part) =>
+    Lines = read_file_lines("202214.txt"), % Example: "202214short.txt"
+    Segs = [],
+    foreach(Line in Lines) 
+        Split = Line.split(" "),
+        Segs := [ [to_point(Split[I]) : I in 1..2..len(Split)] | Segs]
+    end, println(Segs), 
+    Points = [[500,0] | concat(Segs)], println(Points),
+    % x ->, y v
+    NX = 1000,
+    MaxY = max([Y : [_,Y] in Points]), NY = 1 + MaxY + cond(Part = 2, 2, 0), % + 2 to give room for 2 more lines
+    R = {{cond((Y = NY, Part = 2), 1, 0) : Y in 1..NY} : _ in 1..NX}, % Rock at X|Y <=> R[X, 1+Y] = 1
+    foreach(Seg in Segs, I in 1..len(Seg)-1)
+        [X,Y] = Seg[I], [X1,Y1] = Seg[I+1], 
+        DX = sign(X1 - X), DY = sign(Y1 - Y),
+        R[X, 1+Y] := 1,
+        while((X,Y) != (X1,Y1))
+            X := X + DX, Y := Y + DY, R[X, 1+Y] := 1
+        end
+    end, Chr = ".#",
+    foreach(Y in 1..NY, X in 450..550)
+        print(Chr[1+R[X,Y]]), if X = 550 then nl end
+    end,
+    Cnt = 0, Stop = 1,
+    % let one sand unit drop:
+    % do % part 1
+    while(R[500, 1+0] = 0 )  % let one sand unit drop % part 2
+        X = 500, Y = 0, Stop := 0,
+        while(1+Y < NY, Stop = 0)
+            if     R[X,   1+Y + 1] = 0 then             Y := Y + 1
+            elseif R[X-1, 1+Y + 1] = 0 then X := X - 1, Y := Y + 1
+            elseif R[X+1, 1+Y + 1] = 0 then X := X + 1, Y := Y + 1
+            else   R[X,   1+Y] := 1, Stop := 1, Cnt := Cnt + 1
+            end
+        end
+    % while(Stop = 1), % part 1
+    end, % part 2
+    println(cnt=Cnt). 
+% Part 1 Example: cnt = 24, correct
+% Part 1 Problem: cnt = 1068, correct
+% Part 2 Example: cnt = 93, correct
+% Part 2 Problem: cnt = 27936, correct (CPU time 3.07 second=)

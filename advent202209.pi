@@ -1,0 +1,44 @@
+% Advent of Code 09.12.2022 https://adventofcode.com/2022/day/9
+import util.
+
+main1 =>
+    [ZH,SH, ZT,ST] = [0,0, 0,0], 
+    M = new_set(), M.put((0,0)), % mark starting point s
+    Lines = read_file_lines("202209.txt"), 
+    foreach(Line in Lines)
+        [Dir, Steps] = Line.split(), 
+        (DirZ,DirS) = cond(Dir = "R", (0,1), cond(Dir = "L", (0,-1), cond(Dir = "D", (1,0), (-1,0)))),
+        foreach(_ in 1..to_int(Steps))
+            ZH := ZH + DirZ, SH := SH + DirS, % Head moves
+            DZ = ZH - ZT, DS = SH - ST,       % compute distance from Tail to Head 
+            if (abs(DZ) > 1; abs(DS) > 1) then 
+                ZT := ZT + sign(DZ), ST := ST + sign(DS), % Tail moves
+                M.put((ZT,ST)) % mark tail position
+            end
+        end
+    end,    
+    printf("The tail visited %d positions%n", size(M)).
+    % The tail visited 6023 posiions, correct
+
+main2 =>
+    Z = {0 : _ in 0..9}, S = {0 : _ in 0..9}, % Z[1]|S[1] ist Head, der Rest Tail 1..9 
+    M = new_set(), M.put((0,0)), % mark starting point s
+    Lines = read_file_lines("202209.txt"), 
+    foreach(Line in Lines)
+        [Dir, Steps] = Line.split(), 
+        (DirZ,DirS) = cond(Dir = "R", (0,1), cond(Dir = "L", (0,-1), cond(Dir = "D", (1,0), (-1,0)))),
+        foreach(_ in 1..to_int(Steps))
+            Z[1] := Z[1] + DirZ, S[1] := S[1] + DirS, % Head moves
+            foreach(T in 1..9)
+                DZ = Z[T] - Z[1+T], DS = S[T] - S[1+T], % compute distance from Tail to Head resp. predecessor 
+                if (abs(DZ) > 1; abs(DS) > 1) then 
+                    Z[1+T] := Z[1+T] + sign(DZ), S[1+T] := S[1+T] + sign(DS), % Tail moves
+                    if T = 9 then 
+                        M.put((Z[1+9],S[1+9])) % mark new tail (9) position
+                    end
+                end
+            end
+        end
+    end,    
+    printf("The tail visited %d positions%n", size(M)).
+    % The tail visited 2533 positions, correct.

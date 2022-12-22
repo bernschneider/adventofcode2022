@@ -1,0 +1,60 @@
+% Advent of Code 10.12.2022 https://adventofcode.com/2022/day/10
+import util.
+
+main1 =>
+    X = 1, % register
+    Cyc = 0, % cycle
+    Total = 0, % signal strength 
+    Next = 20, % next cycle for measurement
+    Lines = read_file_lines("202210.txt"), 
+    foreach(Line in Lines)
+        if (Cyc = Next-1; Cyc = Next-2) then
+            Sig = Next * X,
+            printf("Cycle %d: X=%d, Sig=%d%n", Next, X, Sig),
+            Total := Total + Sig,
+            Next := Next + 40
+        end, 
+        if Line[1..4] = "noop" then 
+            Cyc := Cyc + 1
+        else
+            Cyc := Cyc + 2,
+            V = to_int(Line[5..len(Line)]), 
+            X := X + V % , println([Cyc, V, X])
+        end
+    end,
+    printf("The sum of the signal strengths at cycle 20, 60, .. is %d", Total). /*
+Cycle 20: X=21, Sig=420
+Cycle 60: X=17, Sig=1020
+Cycle 100: X=7, Sig=700
+Cycle 140: X=17, Sig=2380
+Cycle 180: X=21, Sig=3780
+Cycle 220: X=16, Sig=3520
+The sum of the signal strengths at cycle 20, 60, .. is 11820, correct */
+main2 =>
+    X = 1, % register
+    Cyc = -1, % cycle
+    CRT = {{'.' : _ in 0..39} : _ in 1..6}, 
+    Lines = read_file_lines("202210.txt"), 
+    foreach(Line in Lines)
+        Cyc := Cyc + 1,
+        R = Cyc div 40, C = Cyc mod 40, % R :: 0..5, C in 0..39
+        CRT[1+R,1+C] := cond((X-1 =< C, C =< X+1), '#','.'), % draw pixel
+        if Line[1..4] = "addx" then 
+            Cyc := Cyc + 1,
+            R := Cyc div 40, C := Cyc mod 40, 
+            CRT[1+R,1+C] := cond((X-1 =< C, C =< X+1), '#','.'), % draw pixel
+            V = to_int(Line[5..len(Line)]), 
+            X := X + V % , println([Cyc, V, X])
+        end
+    end,
+    foreach(R in 0..5, C in 0..39)
+        print(CRT[1+R,1+C]),
+        if C = 39 then nl end
+    end. /*
+####.###....##.###..###..#..#..##..#..#.
+#....#..#....#.#..#.#..#.#.#..#..#.#..#.
+###..#..#....#.###..#..#.##...#..#.####.
+#....###.....#.#..#.###..#.#..####.#..#.
+#....#....#..#.#..#.#.#..#.#..#..#.#..#.
+####.#.....##..###..#..#.#..#.#..#.#..#.
+= EPJBRKAH, correkt */

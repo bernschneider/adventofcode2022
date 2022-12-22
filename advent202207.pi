@@ -1,0 +1,50 @@
+% Advent of Code 07.12.2022 https://adventofcode.com/2022/day/7
+import util.
+main =>
+    FileSz =  0, Subdirs = [], Visited = [], Cwd = "", LS = 0, 
+    M = new_map(), % directory -> [FileSz, Subdirs, TotalSize] ..
+    % .. where FileSz = files in the directory itself, TotalSize = FileSz + subdir sizes]
+    foreach(Line in read_file_lines("202207.txt"))
+        Cmd = Line.split(), 
+        if Cmd[1] = "$" then 
+            if LS = 1 then 
+                Visited := [Cwd | Visited],
+                % Cwd -> [FileSz, Subdirs, -1] falls Subdirs != [] (siehe Zeile 33ff)
+                % Cwd -> [FileSz, [], FileSz]  falls Subdirs =  []: 
+                M.put(Cwd, [FileSz, Subdirs, cond(Subdirs=[], FileSz, -1)]), 
+                LS := 0, FileSz := 0, Subdirs := [] % reset computation for next directory
+            end,
+            if Cmd[2] = "cd" then
+               if     Cmd[3] = ".." then Cwd := Cwd[1..find_last_of(Cwd, '/')-1] 
+               elseif Cmd[3] = "/"  then Cwd := "/"
+               else   Cwd := Cwd ++ cond(Cwd="/", "", "/") ++ Cmd[3]
+               end 
+            elseif Cmd[2] = "ls" then LS := 1 % start FileSZ cumulation until next $-line
+            end
+        elseif Cmd[1] = "dir" then 
+             Subdirs := [Cwd ++ cond(Cwd="/", "", "/") ++ Cmd[2] | Subdirs]
+        else FileSz := FileSz + to_int(Cmd[1]) % cumulate FileSz of Cwd
+        end
+    end,
+    if LS = 1 then % we must store the results for the last directory:
+        Visited := [Cwd | Visited],
+        M.put(Cwd, [FileSz, Subdirs, cond(Subdirs=[], FileSz, -1)]) 
+    end,
+    % Fülle die fehlenden TotalSz-Felder in umgekehrter (!) Reihenfolge:
+    foreach(Dir in Visited)
+       [FileSz0, Subdirs0, TotalSz0] = M.get(Dir),
+       if TotalSz0 < 0 then
+            TotalSz1 = FileSz0 + sum([Val[3] : Subdir in Subdirs0, Val = M.get(Subdir)]),
+            M.put(Dir, [FileSz0, Subdirs0, TotalSz1])
+       end
+    end,
+    Total = sum([TotalSz : [_,_,TotalSz] in M.values(), TotalSz =< 100000]),
+    printf("the sum of the directories smaller 100000 is %d%n", Total), /*
+    the sum of the directories smaller 100000 is 1490523, correct */
+    % Find the smallest directory that, if deleted, would free up enough space on the filesystem to run the update. 
+    [_,_,RootSz] = M.get("/"), Unused = 70000000 - RootSz,
+    Minimum = 30000000 - Unused, % minimum space to be deleted for the update
+    Size = [TotalSz : [_,_,TotalSz] in M.values()].sort(), % sorted directory sizes
+    I = 1, while(Size[I] < Minimum) I := I + 1 end,
+    printf("The total size of the directory, which should be deleted is %d", Size[I]). /*
+    The total size of the directory, which should be deleted is 12390492, correct */

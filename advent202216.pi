@@ -1,0 +1,30 @@
+% Advent of Code 16.12.2022 https://adventofcode.com/2022/day/16
+import util.
+scalar_product(LX, LY) = sum([X * Y : {X,Y} in zip(LX, LY)]).
+
+main =>
+    Lines = read_file_lines("202216.txt"), % Problem: "202216.txt"
+    N = len(Lines), % println(n=N),
+    Cs = [ [Parts[J] : J in [2,6|11..len(Parts)]] : Line in Lines, Parts = Line.split(" =;,")],   
+    % foreach(C in Cs) println(C) end,
+    Valves = [C[1] : C in Cs], % println(valves=Valves),
+    Rate =   [to_int(C[2]) : C in Cs], % println(rate=Rate),
+    Edges =  [[I| [find_first_of(Valves, C[J]) : J in 3..len(C)] ] : I in 1..N, C = Cs[I]],
+    % foreach(Edge in Edges) println(Edge) end,
+    Start =  find_first_of(Valves, "AA"), println(start=Start),
+    pressure(1, Start, [0 : _ in 1..N], Result, (Edges, Rate)),
+    println(result=Result). /*
+Part 1 Example: start = 1, result = 1651, CPU time 4.467 seconds, correct
+Part 1 Problem: start = 48, not terminating */
+
+table(   +, +, +, max,    nt) 
+pressure(T, V, O, Result, (Edges, Rate)), T = 30 =>
+    % printf("O = %w, Rate = %w -> %d%n", O, Rate, sum([ X*Y : {X,Y} in zip(O, Rate)])),
+    Result = scalar_product(O, Rate).
+
+pressure(T, V, O, Result, (Edges, Rate)) =>
+    O1 = copy_term(O), 
+    Next = Edges[V], between(1, len(Next), I1), V1 = Next[I1],
+    if V1 = V then O1[V] := 1 end, % open valve V O[V] = 0,
+    pressure(T+1, V1, O1, Result1, (Edges, Rate)),
+    Result = scalar_product(O, Rate) + Result1.

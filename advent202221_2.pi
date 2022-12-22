@@ -1,0 +1,35 @@
+% Advent of Code 21.12.2022 https://adventofcode.com/2022/day/21
+import util, cp.
+eval(M, Key) =>
+    (Term, Res) = M.get(Key),
+    if not Term = val then 
+         [KeyX, Op, KeyY] = Term,
+         (_,X) = M.get(KeyX), eval(M, KeyX),
+         (_,Y) = M.get(KeyY), eval(M, KeyY),
+         % printf("%w %s %w = %w%n", X, Op, Y, Res),
+         if     Op = "+" then Res #= X + Y
+         elseif Op = "-" then Res #= X - Y
+         elseif Op = "*" then Res #= X * Y
+         else                 Res #= X // Y
+        end
+    end.
+
+main => 
+    Max = 10000000000000,
+    Input = [Str.split(" :") : Str in read_file_lines("202221.txt")], % Example: "202221short.txt"
+    M = new_map(), Humn :: 0..Max,
+    foreach(L in Input) 
+        if  L[1] = "humn" then M.put(L[1], (val, Humn))
+        elseif len(L) = 2 then M.put(L[1], (val, to_int(L[2])))
+                          else M.put(L[1], (L[2..4], _))
+        end
+    end,
+    ([KeyX, _, KeyY], _) = M.get("root"),
+    (_,X) = M.get(KeyX), 
+    (_,Y) = M.get(KeyY), 
+    X #= Y,
+    eval(M, KeyX), eval(M, KeyY),
+    solve([Humn, X, Y]),
+    printf("I yell %w", Humn). /*
+Part 2 example: I yell 301, CPU time 0.001 seconds, correct
+Part 2 problem: I yell 3582317956029, CPU time 0.031 seconds, correct */

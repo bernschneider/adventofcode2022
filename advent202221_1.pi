@@ -1,0 +1,21 @@
+% Advent of Code 21.12.2022 https://adventofcode.com/2022/day/21
+import util.
+eval(M, Key) = Res =>
+    Val = M.get(Key),
+    if number(Val) then Res = Val
+    else [KeyX, Op, KeyY] = Val,
+         X = eval(M, KeyX), 
+         Y = eval(M, KeyY),
+         Res = cond(Op = "+", X + Y, cond(Op = "-", X - Y, cond(Op = "*", X * Y, X // Y)) )
+    end.
+
+main => 
+    Xs = [Str.split(" :") : Str in read_file_lines("202221.txt")], % Example: "202221short.txt"
+    M = new_map(),
+    foreach(X in Xs) % [1..K]
+        if len(X) = 2 then M.put(X[1], to_int(X[2]))
+                      else M.put(X[1], X[2..4])
+        end
+    end, % [KeyX, Op, KeyY] = M.get("root"), printf("Op = %s%n", Op),
+    Res = eval(M, "root"), % "root"
+    println(Res). % 121868120894282, correct

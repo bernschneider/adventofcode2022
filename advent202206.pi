@@ -1,0 +1,19 @@
+% Advent of Code 06.12.2022
+% https://adventofcode.com/2022/day/6
+notdifferent(L) =>
+    N = len(L), 
+    between(1, N-1, I), between(I+1, N, J),
+    L[I] = L[J].
+
+findmarker(Len, S) =>
+    I = Len,
+    while(notdifferent(S[I+1-Len..I])) I := I + 1 end, 
+    printf("There are %d characters before the first start-of-packet marker%n", I).
+
+main =>
+    S = read_file_chars("202206.txt"),
+    findmarker( 4, S),
+    findmarker(14, S). /*
+1833 characters need to be processed before the first start-of-packet marker is detected
+3425 characters need to be processed before the first start-of-packet marker is detected
+CPU time 0.656 seconds, correct */

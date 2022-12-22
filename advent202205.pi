@@ -1,0 +1,39 @@
+% Advent of Code 05.12.2022
+% https://adventofcode.com/2022/day/5
+import util.
+
+main(Part) =>
+    Lines = read_file_lines("202205.txt"),
+    Mx = 1, 
+    while(Lines[Mx] != "") Mx := Mx + 1 end, 
+    Mx := Mx - 2, println(mx=Mx),
+    NC = Lines[Mx+1].split().last().to_int(), println(nc=NC),
+    N = NC * Mx,
+    Crates = {{' ' : _ in 1..N} : _ in 1..NC}, 
+    Sz = [0 : _ in 1..NC],
+    foreach(I in 1..Mx)
+        Cs = [Lines[I,J] : J in 2..4..4*NC], % println(Cs),
+        foreach(C in 1..NC, Cs[C] != ' ') 
+            Crates[C,Mx-I+1] := Cs[C],
+            Sz[C] := Sz[C] + 1
+        end
+    end, % println(Crates), println(Sz),
+    foreach(I in Mx+3..len(Lines))
+        L = Lines[I].split(), 
+        [Cnt, From, To] = [to_int(L[2]), to_int(L[4]), to_int(L[6])],
+        if Part = 1 then
+            foreach(_ in 1..Cnt)
+                Crate = Crates[From,Sz[From]], Crates[From,Sz[From]] := ' ', Sz[From] := Sz[From] - 1,
+                Sz[To] := Sz[To] + 1, Crates[To,Sz[To]] := Crate
+            end % , foreach(C in 1..NC) println(Crates[C]) end, nl
+        else % Part = 2
+            foreach(J in 0..Cnt-1)
+                Crates[To,Sz[To]+Cnt-J] := Crates[From,Sz[From]-J], Crates[From,Sz[From]-J] := ' '
+            end,
+            Sz[From] := Sz[From] - Cnt, Sz[To] := Sz[To] + Cnt
+        end
+         % , foreach(C in 1..NC) println(Crates[C]) end, nl            
+    end,
+    printf("Part %d: Top of each stack: %s", Part, [Crates[C,Sz[C]] : C in 1..NC]). /* 
+Part 1: Top of each stack: BWNCQRMDB, correct
+Part 2: Top of each stack: NHWZCBNBF, correct */
