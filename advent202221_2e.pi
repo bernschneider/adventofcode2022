@@ -1,0 +1,21 @@
+import cp.
+
+main =>
+    Vars = [Humn, Pppw, Sjmn],
+	Pppw #= Sjmn,
+	Dbpl #= 5,
+	Cczh #= Sllz + Lgvd,
+	Zczc #= 2,
+	Ptdq #= Humn - Dvpt,
+	Dvpt #= 3,
+	Lfqf #= 4,
+	% Humn #= 5,
+	Ljgn #= 2,
+	Sjmn #= Drzm * Dbpl,
+	Sllz #= 4,
+	Pppw #= Cczh // Lfqf,
+	Lgvd #= Ljgn * Ptdq,
+	Drzm #= Hmdt - Zczc,
+	Hmdt #= 32,
+    solve(Vars),
+    print(Vars).
