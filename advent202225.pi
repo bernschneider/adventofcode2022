@@ -1,0 +1,19 @@
+% Advent of Code 25.12.2022 https://adventofcode.com/2022/day/25
+to_dec(Str) = X => % convert SNAFU number to decimal
+    List = [cond(C = '=', -2, cond(C = '-', -1, to_int(C))) : C in Str],
+    X = sum([List[I]*5**(len(List)-I) : I in 1..len(List)]).
+
+to_SNAFU(X) = List => % convert decimal number to SNAFU
+    L = [ord(C)-48 : C in to_radix_string(X,5)], 
+    foreach(I in len(L)..-1..2, L[I] > 2)
+        L[I]   := L[I] - 5,
+        L[I-1] := L[I-1] + 1
+    end,
+    List = [cond(I = -2, '=', cond(I = -1, '-', chr(48+I))) : I in L].
+
+main => 
+    Rqs = read_file_lines("202225.txt"),  % Example: "202225short.txt"
+    Sum = sum([to_dec(Rq) : Rq in Rqs]),
+    println(to_SNAFU(Sum)). /*
+Part 1 example: 2=-1=0, correct
+Part 1 problem: 2-=12=2-2-2-=0012==2, correct */

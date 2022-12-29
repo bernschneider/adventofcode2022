@@ -1,0 +1,42 @@
+% Advent of Code 22.12.2022 https://adventofcode.com/2022/day/22
+import util.
+wrap(M, NR,NC, DR,DC, R1,C1) = (R3,C3 )=>
+    R2 = R1, C2 = C1,
+    if (0>=R2; R2>NR; 0>=C2; C2>NC; M[R2,C2] = ' ') 
+    then
+        if     DR = 0 then C2 := cond(DC = 1, 1, NC)
+        elseif DC = 0 then R2 := cond(DR = 1, 1, NR)
+        end,
+        while(0<R2, R2=<NR, 0<C2, C2=<NC, M[R2,C2] = ' ') 
+            R2 := R2 + DR, C2 := C2 + DC 
+        end
+    end, R3 = R2, C3 = C2.
+
+main => 
+    M = read_file_lines("202222.txt"), % Example: "20222.txt"
+    NR = len(M) - 2, NC = len(M[1]), println([NR,NC]),
+    % Some lines in M are shorter than NC characters; fill them up with blanks:
+    foreach(R0 in 1..NR, len(M[R0]) < NC) M[R0] := M[R0] ++ [' ' : _ in len(M[R0])+1..NR] end, 
+    R = 1, C = find_first_of(M[1], '.'), D = 0, % >
+    Cmd = M[len(M)], println(Cmd),
+    Steps = map(to_int, Cmd.split("LR")), Dir = Cmd.split("0123456789"),
+    printf("Steps = %w, Dir = %w%n", Steps, Dir), % Steps = [10,5,5,10,4,5,5], Dir = [R,L,R,L,R,L]
+    N = len(Steps), Code = {(0,1),(1,0),(0,-1),(-1,0)},
+    foreach(I in 1..N)
+        Cnt = Steps[I], (DR,DC) = Code[1+D], 
+        printf("%d Steps in new dir %d|%d(%d)%n", Cnt, DR, DC, D),
+        R1 = R + DR, C1 = C + DC, % candidate for next step
+        (R3,C3) = wrap(M, NR,NC, DR,DC, R1,C1), R1 := R3, C1 := C3,
+        while(Cnt > 0, 0<R1, R1=<NR, 0<C1, C1=<NC, M[R1,C1] = '.')
+            R := R1, C := C1, Cnt := Cnt - 1, % go!
+            printf("  Dir %d|%d, Cnt %d to %d|%d%n", DR, DC, Cnt, R,C), 
+            R1 := R + DR, C1 := C + DC, % candidate for next step
+            (R4,C4) = wrap(M, NR,NC, DR,DC, R1,C1), R1 := R4, C1 := C4
+        end,
+        if I < N then
+            if  Dir[I] = "R" then D := (D + 1) mod 4 else D := (D - 1) mod 4 end
+        end
+    end,
+    printf("Pos: %d|%d, Dir: %d, password: %d", R, C, D, 1000 * R + 4 * C + D). /*
+    Part 1 example: Pos: 6|8, Dir: 0, password: 6032, correct
+    Part 1 problem: Pos: 58|62, Dir: 0, password: 58248, correct*/

@@ -1,0 +1,38 @@
+% Advent of Code 24.12.2022 https://adventofcode.com/2022/day/24
+import util, sat.
+
+main ?=> 
+    Inp = read_file_lines("202224.txt"), % println(Inp), % Example: "202224short.txt"
+    NR = len(Inp) - 2, NC = len(Inp[1]) - 2, Dirs = {(-1,0),(1,0),(0,-1),(0,1)}, Dchars = "^v<>", println(nr=NR),
+    % M[1] = ^, M[2] = v, M[3] = <, M[4] = >
+    M = {{{ cond(Idir = Dir, 1, 0) : C in 1..NC, Idir = find_first_of(Dchars, Inp[1+R,1+C])} : R in 1..NR} : Dir in 1..4},
+    N = 2*(NR+NC), Mins :: NR+NC..N, % = 17,
+    ER = new_array(N), EC = new_array(N), ER :: 1..NR, EC :: 1..NC,
+    ER[1] #= 1, EC[1] #= 1, 
+    foreach(Min in 1..2*(NR+NC)-1) % Mins-1
+        println(minute=Min),
+        M1 = {{{0 : _ in 1..NC} : _ in 1..NR} : _ in 1..4}, % new positions of the blizzards
+        foreach(Dir in 1..4) % blizzards moving
+            (DR,DC) = Dirs[Dir],
+            foreach(R in 1..NR, C in 1..NC, M[Dir,R,C] = 1) % there is a blizzard in direction Dir at R|C
+                R1 = R + DR, C1 = C + DC,                   % candidate for next position
+                if R1 = 0 then R1 := NR elseif R1 > NR then R1 := 1 end, % wrap around!
+                if C1 = 0 then C1 := NC elseif C1 > NC then C1 := 1 end,
+                M1[Dir,R1,C1] := 1
+            end
+        end,
+        M := copy_term(M1),
+        /*foreach(R in 1..NR, C in 1..NC)
+            L = [M[Dir,R,C] : Dir in 1..4], Cnt = sum(L),
+            Chr = cond(Cnt = 0, '.', cond(Cnt > 1, chr(48+Cnt), Dchars[find_first_of(L, 1)])),
+            print(Chr), if C = NC then nl end
+        end, nl,*/
+        Min #>= Mins #=> (ER[Min] #= NR #/\ EC[Min] #= NC), 
+        foreach(Dir in 1..4) matrix_element(M[Dir], ER[Min], EC[Min], V), Min #<= Mins #=> V #= 0 end,
+        abs(ER[Min+1] - ER[Min]) + abs(EC[Min+1] - EC[Min]) #=< 1
+    end,
+    solve([$min(Mins)], ER ++ EC),
+    println(mins=Mins+1),
+    println(ER[1..Mins]), println(EC[1..Mins]), nl, fail. /*
+Part 1 example mins = 18, correct
+Part 1 problem mins = 269, CPU time ca. 20 minutes, no more solutions, correct */

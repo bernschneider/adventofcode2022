@@ -1,0 +1,43 @@
+% Advent of Code 23.12.2022 https://adventofcode.com/2022/day/23
+import util.
+main => 
+    Inp = read_file_lines("202223.txt"), % Example: "202223short.txt"
+    Border = 100, % 1000
+    NR = len(Inp) + 2*Border, NC = len(Inp[1]) + 2*Border, 
+    M = {{cond((R=<Border;R>NR-Border;C=<Border;C>NC-Border), '.', Inp[R-Border,C-Border]) : C in 1..NC} : R in 1..NR},
+    Rmin = Border + 1, Rmax = NR - Border, Cmin = Border + 1, Cmax = NC - Border,
+    Cnt = 0, foreach(R in Rmin..Rmax, C in Cmin..Cmax, M[R,C] = '#') Cnt := Cnt + 1 end, println(cnt=Cnt),
+    Dirs = {(-1,0),(1,0),(0,-1),(0,1)}, Round = 1, Moves = 1,
+    while(Moves = 1)
+        Moves := 0, P = [], Sdir = (Round - 1) mod 4, % Moves, Proposals, Starting direction 
+        % If no other Elves are in one of those eight positions, vvvv the Elf does not do anything during this round:
+        printf("Round %d: (%d|%d) (%d|%d) ", Round, Rmin,Cmin, Rmax,Cmax),
+        foreach(R in Rmin..Rmax, C in Cmin..Cmax, M[R,C] = '#', membchk('#', [ M[R1,C1] : R1 in R-1..R+1, C1 in C-1..C+1, (R1,C1)!=(R,C)]) )
+            Found = 0,
+            foreach(I in 0..3, Found = 0)
+                (DR,DC) = Dirs[1 + (Sdir + I) mod 4], % println((R,C,DR,DC)),
+                if ((DC=0, M[R+DR,C-1] = '.', M[R+DR,C] = '.', M[R+DR,C+1] = '.'); 
+                    (DR=0, M[R-1,C+DC] = '.', M[R,C+DC] = '.', M[R+1,C+DC] = '.')) 
+                then P := [{R,C,R+DR,C+DC} | P], Found := 1 
+                end
+            end
+        end, 
+        Mv = new_map(), % Moves
+        foreach({R,C,R1,C1} in P) 
+            if Mv.has_key({R1,C1}) then Mv.put({R1,C1}, nil) else Mv.put({R1,C1}, {R,C}) end 
+        end, 
+        foreach({R1,C1} in Mv.keys(), Mv.get({R1,C1})!=nil) 
+            {R,C} = Mv.get({R1,C1}), % print({R1,C1}),
+            M[R,C] := '.', M[R1,C1] := '#', Moves := 1,
+            if R1 < Rmin then Rmin := R1 elseif R1 > Rmax then Rmax := R1 end,
+            if C1 < Cmin then Cmin := C1 elseif C1 > Cmax then Cmax := C1 end
+        end, nl,
+        if Round = 10 then
+            printf("The smallest rectangle contains %d ground files%n", (Rmax - Rmin + 1) * (Cmax- Cmin + 1) - Cnt)
+        end,
+        Round := Round + 1
+    end,
+    % foreach(R in 1..NR, C in 1..NC) print(M[R,C]), if C = NC then nl end end,
+    printf("There were %d rounds%n", Round - 1). /*
+Example: The smallest rectangle contains  110 ground files. There were  20 rounds, correct
+Problem: The smallest rectangle contains 4146 ground files. There were 957 rounds, CPU time 24.25 seconds, correct */
